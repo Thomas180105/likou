@@ -1,31 +1,27 @@
-#### 关于dfs的书写之后统一用以下风格来（本题中使用了一种与这个风格完全相反的风格）：在调用搜索函数时，不需要确保传递的candidate是合法的，比如此题中的“grid[i][j] && !visited[i][j]”不需要被满足，然后在搜索函数开始再进行判断，不满足条件就直接return。对于使用栈实现的情形，即每次push的时不需要判断“grid[i][j] && !visited[i][j]”，每次pop的时候再来检查
-
-#### 多层循环时注意检查变量名字是否有冲突,比如本题中在maxAreaOfIsland外层循环中出现了i和j,在内层中枚举u的四个邻居的时候切记不可以再用i
-
-#### 力扣的判题逻辑是生成一个Solution类的实例,然后调用实例的方法,注意进行初始化工作，比如下面的代码就因为没有保证在每次调用maxAreaOfIsland时visited都是全False而导致了错误
-
-```C++
 #include<stack>
 #include<vector>
 #include<cmath>
 using namespace std;
-
-const int N = 55;
-int visited[N][N];
-int m, n;
-
 struct point{
     int x, y;
+    point(int x, int y):x(x), y(y){}
 };
 class Solution {
 public:
+    int n, m;
     bool isInBorad(point p) {return p.x >= 0 && p.x < n && p.y >= 0 && p.y < m;}
     vector<int> dx{0, 0, 1, -1};
     vector<int> dy{1, -1, 0, 0};
     int maxAreaOfIsland(vector<vector<int>>& grid) {
+        const int N = 55;
+        int visited[N][N];
         if (grid.empty()) return 0;
         n = grid.size();
         m = grid[0].size();
+        for (int i = 0; i < N; ++i)
+        {
+            for (int j = 0; j < N; ++j) visited[i][j] = 0;
+        }
         int ans = 0;
         for (int i = 0; i < n; ++i)
         {
@@ -46,12 +42,12 @@ public:
                         {
                             ++res;
                             visited[u.x][u.y] = true;
-                            for (int t = 0; t < 4; ++t) 
+                            for (int t = 0; t < 4; ++t)
                             {
                                 point v(u.x + dx[t], u.y + dy[t]);
                                 if (isInBorad(v) && grid[v.x][v.y] && !visited[v.x][v.y]) st.push(v);
                             }
-                        } 
+                        }
                     }
                     ans = max(ans, res);
                 }
@@ -60,4 +56,3 @@ public:
         return ans;
     }
 };
-```
