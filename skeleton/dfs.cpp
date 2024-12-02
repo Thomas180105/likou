@@ -1,7 +1,10 @@
 /*内容：
 0. 链式前向星表示有向图的板子
 1. 有向图，递归实现/栈实现的dfs
+补充说明：
+ dfs有很多常见变种应用，见46.cpp（回溯法）
  */
+
 #include <iostream>
 #include <cstring>
 #include <vector>
@@ -85,7 +88,9 @@ void reset_visited()
 3 0
 3 5
  */
-int main() {
+
+static int main_test()
+{
     int u, v, w;
     std::cin >> n >> m;
     init(); //ATTENTION:需要调用初始化函数，且要在n赋值之后再调用
