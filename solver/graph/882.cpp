@@ -1,0 +1,35 @@
+class Solution {
+public:
+    int reachableNodes(vector<vector<int>>& edges, int maxMoves, int n) {
+        vector<vector<pair<int, int>>> graph(n);//(间隔细分节点数， 节点编号)
+        for (auto e : edges)
+        {
+            graph[e[0]].emplace_back(e[2], e[1]);
+            graph[e[1]].emplace_back(e[2], e[0]);
+        }
+
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> que;
+        que.push({0, 0});//(当前距离起点距离， 节点编号)
+
+        vector<bool> visted(n, false);
+        vector<unordered_map<int, int>> info(n);
+        int ans = 0;
+        while(!que.empty())
+        {
+            auto [step, curNode] = que.top();
+            que.pop();
+            if (visted[curNode]) continue;
+            visted[curNode] = true;
+            ++ans;
+
+            for (auto [edgeLen, nextNode] : graph[curNode])
+            {
+                info[curNode][nextNode] = min(edgeLen, maxMoves - step);
+                if (step + edgeLen + 1 <= maxMoves && !visted[nextNode]) que.push({step + edgeLen + 1, nextNode});
+            }
+        }
+
+        for (auto e : edges) ans += min(e[2], info[e[0]][e[1]] + info[e[1]][e[0]]);
+        return ans;
+    }
+};

@@ -1,0 +1,144 @@
+//用两个栈来实现不行，会被卡
+// class MaxStack {
+// private:
+//     stack<int> stk;
+//     stack<int> maxn;
+// public:
+//     MaxStack(){
+
+//     }
+
+//     void push(int x) {
+//         // cout<<"push\n";
+//         stk.push(x);
+//         maxn.push(maxn.empty() ? x : max(x, maxn.top()));
+//     }
+
+//     int pop() {
+//         int res = stk.top();
+//         stk.pop();
+//         maxn.pop();
+//         return res;
+//     }
+
+//     int top() {
+//         return stk.top();
+//     }
+
+//     int peekMax() {
+//         // cout<<"peekMax";
+//         return maxn.top();
+//     }
+
+//     int popMax() {
+//         // cout<<"popMax\n";
+//         int target = maxn.top();
+//         stack<int> tmp;
+//         while(true)
+//         {
+//             if (stk.top() != target) {tmp.push(stk.top()); stk.pop(); maxn.pop();}
+//             else {stk.pop(); maxn.pop(); break;}
+//         }
+//         while(!tmp.empty()) {stk.push(tmp.top()); maxn.push(maxn.empty() ? tmp.top() : max(tmp.top(), maxn.top())); tmp.pop();}
+//         return target;
+//     }
+// };
+
+//那看起来可以往优先级队列+栈的方向靠近
+//出大问题的地方是优先级队列的pop()以及栈的popMax(),考虑延迟策略
+//每次弹出的时候需要检查当前是不是等待被延迟删除的元素，如果是就需要一直弹出
+//考虑被删除元素的存放容器，事实上我们只需要对于每一个元素知道他是不是被删除的，所以用哈希
+//注意不能只能用值来跟踪要删除的值，否则会破坏栈的pop的语义，所以用一个时间戳来
+// class MaxStack {
+// private:
+//     stack<pair<int, int>> stk;//second为时间戳
+//     priority_queue<pair<int, int>> que;
+//     unordered_set<int> hash;
+//     int cnt;
+// public:
+//     MaxStack(){
+//         cnt = 0;
+//     }
+
+//     void push(int x) {
+//         stk.push({x, cnt});
+//         que.push({x, cnt++});
+//     }
+
+//     int pop() {
+//         while(hash.count(stk.top().second)) {hash.erase(stk.top().second); stk.pop();}
+//         int res = stk.top().first;
+//         hash.insert(stk.top().second); // TODO:注意一定是先加再删除，不然容易出现先insert再pop的离谱代码
+//         stk.pop();
+//         return res;
+//     }
+
+//     int top() {
+//         while(hash.count(stk.top().second)) {hash.erase(stk.top().second); stk.pop();}
+//         return stk.top().first;
+//     }
+
+//     int peekMax() {
+//         while(hash.count(que.top().second)) {hash.erase(que.top().second); que.pop();}
+//         return que.top().first;
+//     }
+
+//     int popMax() {
+//         while(hash.count(que.top().second)) {hash.erase(que.top().second); que.pop();}
+//         int res = que.top().first;
+//         hash.insert(que.top().second);
+//         que.pop();
+//         return res;
+//     }
+// };
+
+//往logN时间复杂度去想，还可以考虑红黑树
+//这里不要思维惯性觉得只能用set<int>，尽管我们只需要管理元素集合，但是当我们需要维护更复杂特性的时候完全可以使用set<pair<>>或者map<>来降维打击
+class MaxStack {
+private:
+    // map<int, int> value;//(val, time)
+    // map<int, int> time;//(time, val)
+    set<pair<int, int>> value;//(val, time)
+    set<pair<int, int>> time;//(time, val)
+    int cnt;
+public:
+    MaxStack() : cnt(0){
+    }
+
+    void push(int x) {
+        value.insert({x, cnt});
+        time.insert({cnt++, x});
+    }
+
+    int pop() {
+        auto to_del = *time.rbegin();
+        time.erase(to_del);
+        value.erase({to_del.second, to_del.first});
+        return to_del.second;
+    }
+
+    int top() {
+        return time.rbegin()->second;
+    }
+
+    int peekMax() {
+        return value.rbegin()->first;
+    }
+
+    int popMax() {
+        auto to_del = *value.rbegin();
+        value.erase(to_del);
+        time.erase({to_del.second, to_del.first});
+        return to_del.first;
+    }
+};
+
+/**
+ * Your MaxStack object will be instantiated and called as such:
+ * MaxStack* obj = new MaxStack();
+ * obj->push(x);
+ * int param_2 = obj->pop();
+ * int param_3 = obj->top();
+ * int param_4 = obj->peekMax();
+ * int param_5 = obj->popMax();
+ */
